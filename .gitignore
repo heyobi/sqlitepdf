@@ -1,0 +1,14 @@
+# Build directories
+build/
+out/
+
+# Generated PDF files
+*.pdf
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor artifacts
+.vscode/
+.idea/
