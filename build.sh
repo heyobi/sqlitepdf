@@ -43,6 +43,7 @@ if [ "${EMCC_MAJOR}" -ge 2 ]; then
     BACKEND_FLAGS=(
         -s WASM=0
         -s SINGLE_FILE=1
+        -s WASM_ASYNC_COMPILATION=0
         -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]'
     )
 else

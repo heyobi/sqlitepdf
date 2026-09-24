@@ -124,9 +124,16 @@ static void run_one(sqlite3_stmt *stmt) {
     if (ncol > MAX_COLS) ncol = MAX_COLS;
 
     if (ncol == 0) {
-        while (sqlite3_step(stmt) == SQLITE_ROW) {}
-        printf("ok, %d change%s\n", sqlite3_changes(db),
-               sqlite3_changes(db) == 1 ? "" : "s");
+        /* sqlite3_changes() keeps the count of the last insert, update or
+         * delete, so a create table right after an insert would report
+         * that insert's rows. The total before and after is exact. */
+        int before = sqlite3_total_changes(db);
+        int changes;
+        while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {}
+        /* On failure the caller prints the error from finalize. */
+        if (rc != SQLITE_DONE) return;
+        changes = sqlite3_total_changes(db) - before;
+        printf("ok, %d change%s\n", changes, changes == 1 ? "" : "s");
         return;
     }
 

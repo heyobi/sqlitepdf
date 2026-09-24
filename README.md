@@ -6,10 +6,12 @@ read only text fields that behave like a terminal.
 
 ## How it works
 
-The engine is SQLite compiled to asm.js, not WebAssembly. The javascript
-engine inside a PDF viewer has no WASM, so the C code has to come out the
-other side as plain javascript. Emscripten 1.39.20 is the last release
-that can still do that.
+The engine is SQLite compiled to plain javascript, not WebAssembly. The
+javascript engine inside a PDF viewer has no WASM, so the C code has to
+come out the other side as javascript. Two emscripten toolchains can do
+that: 1.x (fastcomp, real asm.js, last release 1.39.20) and 2.x or later
+(wasm2js). `build.sh` detects which one you have and picks the matching
+flags.
 
 The compiled engine is stored as a document level javascript object, which
 the viewer executes the moment the file opens. A second script sets up the
@@ -22,6 +24,9 @@ which pushes lines into a buffer, and the buffer is painted into the
 
 ## Build
 
+Install emsdk and put `emcc` on your PATH first (`source emsdk_env.sh`).
+`build.sh` does not install the toolchain for you.
+
 Smoke test first. This compiles a few lines of C with the exact same
 flags and wraps them in a PDF, which tells you whether the emscripten
 glue survives the viewer without waiting on a multi megabyte engine:
@@ -30,8 +35,8 @@ glue survives the viewer without waiting on a multi megabyte engine:
 ./build.sh hello
 ```
 
-Then the real thing. This clones emsdk, pins 1.39.20, downloads the
-SQLite amalgamation, compiles, and writes `out/sqlite.pdf`:
+Then the real thing. This downloads the SQLite amalgamation, compiles,
+and writes `out/sqlite.pdf`:
 
 ```
 ./build.sh
