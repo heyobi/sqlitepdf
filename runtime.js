@@ -58,11 +58,16 @@ function sqlpdf_run() {
     }
 
     sqlpdf_echo("> " + sql);
+
+    /* Hold the repaint until the query is done. Otherwise every printed
+     * row rewrites all the output fields, which is slow for big results. */
+    SQLPDF_READY = false;
     try {
         Module.ccall("sqlpdf_exec", null, ["string"], [sql]);
     } catch (e) {
-        sqlpdf_echo("engine crashed: " + e);
+        SQLPDF_BUFFER.push("engine crashed: " + e);
     }
+    SQLPDF_READY = true;
     sqlpdf_flush();
 }
 
@@ -74,6 +79,12 @@ function sqlpdf_clear() {
 
 function sqlpdf_on_ready() {
     sqlpdf_flush();
+}
+
+/* generate.py wraps the engine in a try block and stores the error here.
+ * Without this the console would just stay empty if the engine failed. */
+if (typeof SQLPDF_BOOT_ERROR !== "undefined" && SQLPDF_BOOT_ERROR) {
+    SQLPDF_BUFFER.push("engine failed to start: " + SQLPDF_BOOT_ERROR);
 }
 
 SQLPDF_READY = true;
